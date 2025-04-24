@@ -13,10 +13,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
@@ -29,8 +29,8 @@ jobs:
       - name: Run tests with coverage
         run: npm test -- --coverage
 
-      - name: Upload coverage report (optional)
-        uses: actions/upload-artifact@v3
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: coverage
