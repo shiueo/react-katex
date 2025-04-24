@@ -1,11 +1,10 @@
 import React, { ElementType, ReactElement, useEffect, useState, useMemo } from 'react'
 import KaTeX, { ParseError, KatexOptions } from 'katex'
-import './index.css'
+import 'katex/dist/katex.min.css'
 
 type KatexProps = {
   math: string
   block?: boolean
-  errorClassName?: string
   renderError?: (error: ParseError | TypeError) => ReactElement
   settings?: KatexOptions
   as?: ElementType
@@ -17,7 +16,6 @@ type KatexState = { type: 'success'; innerHtml: string } | { type: 'error'; elem
 const KaTeXComponent: React.FC<KatexProps> = ({
   math,
   block = false,
-  errorClassName = 'katex-error',
   renderError,
   settings,
   as: Component = block ? 'div' : 'span',
@@ -27,6 +25,7 @@ const KaTeXComponent: React.FC<KatexProps> = ({
     () => ({
       displayMode: block,
       throwOnError: !!renderError,
+      errorColor: 'red',
       ...settings,
     }),
     [block, renderError, settings]
@@ -57,15 +56,14 @@ const KaTeXComponent: React.FC<KatexProps> = ({
           setState({ type: 'error', element: renderError(error) })
         } else {
           // Default error message
-          const errorMessage = `<span class="${errorClassName}">${error.message}</span>`
-          setState({ type: 'error', element: errorMessage })
+          setState({ type: 'error', element: error.message })
         }
       } else {
         // unknown errors
         throw error
       }
     }
-  }, [math, renderOptions, renderError, errorClassName])
+  }, [math, renderOptions, renderError])
 
   // Rendering logic
   if (state.type === 'error') {
