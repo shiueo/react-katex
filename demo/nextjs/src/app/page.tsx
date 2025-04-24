@@ -5,7 +5,7 @@ import KaTeXComponent from '@shiueo/react-katex'
 const Home = () => {
   return (
     <div className='text-lg mx-auto max-w-4xl py-12'>
-      <h1 className="text-2xl font-bold mb-6">KaTeX Demo</h1>
+      <h1 className="text-2xl font-bold mb-6">@shiueo/react-katex Demo</h1>
 
       <div className="space-y-8">
 
