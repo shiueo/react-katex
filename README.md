@@ -14,9 +14,11 @@ To install the package, run:
 npm install @shiueo/react-katex
 ```
 
-The required KaTeX CSS is already included in the package, so you do not need to import it separately. Just install the package, and the styling will be automatically applied.
 ## Usage
 ```tsx
+// Import KaTeX CSS once in your project, before using this component
+import 'katex/dist/katex.min.css'
+
 import KaTeXComponent from '@shiueo/react-katex';
 ```
 Then use the component in your application:
