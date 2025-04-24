@@ -5,15 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-### Added
-- Support for `as` prop to customize rendered element.
-- Error rendering via `renderError` prop.
+## [1.0.2] - 2025-04-24
 
 ### Changed
-- Internal refactoring of component to use discriminated union state.
-- Switched to `useMemo` for render options optimization.
+- Readme updated.
+
 
 ## [1.0.1] - 2025-04-24
 
@@ -29,3 +25,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Basic rendering of KaTeX math expressions.
 - Support for inline (`span`) and block (`div`) math.
 - Optional settings via `KaTeXOptions`.
+
+
+## [Unreleased]
+
+### Added
+- Support for `as` prop to customize rendered element.
+- Error rendering via `renderError` prop.
+
+### Changed
+- Internal refactoring of component to use discriminated union state.
+- Switched to `useMemo` for render options optimization.

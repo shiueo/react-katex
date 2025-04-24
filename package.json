@@ -1,6 +1,6 @@
 {
   "name": "@shiueo/react-katex",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A React component for rendering LaTeX math expressions using KaTeX",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
