@@ -34,7 +34,7 @@ The component accepts several props to customize its behavior:
 
 - `as?: ElementType`: The component type to render (default: span for inline, div for block-level).
 
-> 💡 **Example usage:** See [demo/nextjs/src/app/page.tsx](nextjs/page.tsx) for comprehensive examples.
+> 💡 **Example usage:** See [nextjs/page.tsx](./demo/nextjs/src/app/page.tsx) for comprehensive examples.
 
 ## License
 MIT License. See [LICENSE](./LICENSE) for more details.
