@@ -1,6 +1,5 @@
 import React, { ElementType, ReactElement, useEffect, useState, useMemo } from 'react'
 import KaTeX, { ParseError, KatexOptions } from 'katex'
-import 'katex/dist/katex.min.css'
 
 type KatexProps = {
   math: string
