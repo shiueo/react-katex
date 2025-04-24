@@ -36,5 +36,5 @@ The component accepts several props to customize its behavior:
 
 > 💡 **Example usage:** See [demo/nextjs/src/app/page.tsx](nextjs/page.tsx) for comprehensive examples.
 
-# License
+## License
 MIT License. See [LICENSE](./LICENSE) for more details.
