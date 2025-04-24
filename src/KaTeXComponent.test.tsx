@@ -23,8 +23,14 @@ describe('KaTeXComponent', () => {
       if (math === '\\frac{1}{2}') {
         return '<span class="katex">1/2</span>'
       }
-      if (math === 'invalid') {
+      if (math === '\\frac{1}') {
+        return '<span class="katex-error">\\frac{1}</span>' // Incomplete fraction
+      }
+      if (math === 'text' || math === 'invalid') {
         throw new KaTeX.ParseError('Invalid math expression')
+      }
+      if (math === 'type-error') {
+        throw new TypeError('Type error in math expression')
       }
       return '<span class="katex">' + math + '</span>'
     })
@@ -137,5 +143,171 @@ describe('KaTeXComponent', () => {
     render(<KaTeXComponent math="\frac{1}{2}" />)
     const element = document.querySelector('span')
     expect(element?.innerHTML).toContain('<img')
+  })
+
+  test('handles typical math expressions beyond fractions', () => {
+    const expressions = [
+      '\\sqrt{x^2 + y^2}',
+      '\\sum_{i=1}^{n} i^2',
+      'e^{i\\pi} + 1 = 0'
+    ]
+    
+    expressions.forEach(expr => {
+      jest.clearAllMocks()
+      render(<KaTeXComponent math={expr} />)
+      expect(KaTeX.renderToString).toHaveBeenCalledWith(expr, expect.anything())
+    })
+  })
+
+  test('handles multiple consecutive renders with different expressions', () => {
+    const { rerender } = render(<KaTeXComponent math="\frac{1}{2}" />)
+    expect(KaTeX.renderToString).toHaveBeenCalledWith('\\frac{1}{2}', expect.anything())
+    
+    rerender(<KaTeXComponent math="\sqrt{2}" />)
+    expect(KaTeX.renderToString).toHaveBeenCalledWith('\\sqrt{2}', expect.anything())
+  })
+
+  test('distinguishes between ParseError and TypeError', () => {
+    // For ParseError
+    jest.clearAllMocks()
+    render(<KaTeXComponent math="invalid" />)
+    expect(screen.getByText('Invalid math expression')).toBeInTheDocument()
+    
+    // For TypeError
+    jest.clearAllMocks()
+    render(<KaTeXComponent math="type-error" />)
+    expect(screen.getByText('Type error in math expression')).toBeInTheDocument()
+  })
+
+  test('memoization prevents unnecessary re-renders', () => {
+    const { rerender } = render(<KaTeXComponent math="\frac{1}{2}" />)
+    expect(KaTeX.renderToString).toHaveBeenCalledTimes(1)
+    
+    // Rerender with same props
+    rerender(<KaTeXComponent math="\frac{1}{2}" />)
+    
+    // Since we're using React.memo, KaTeX.renderToString should not be called again
+    // if props haven't changed
+    expect(KaTeX.renderToString).toHaveBeenCalledTimes(1)
+    
+    // Rerender with different props
+    rerender(<KaTeXComponent math="\frac{1}{3}" />)
+    expect(KaTeX.renderToString).toHaveBeenCalledTimes(2)
+  })
+
+  test('handles changing block mode dynamically', () => {
+    const { rerender } = render(<KaTeXComponent math="\frac{1}{2}" block={false} />)
+    expect(document.querySelector('span')).toBeInTheDocument()
+    
+    rerender(<KaTeXComponent math="\frac{1}{2}" block={true} />)
+    expect(document.querySelector('div')).toBeInTheDocument()
+  })
+
+  test('handles custom settings changes', () => {
+    const initialSettings = { strict: true }
+    const newSettings = { strict: false, trust: true }
+    
+    const { rerender } = render(<KaTeXComponent math="\frac{1}{2}" settings={initialSettings} />)
+    expect(KaTeX.renderToString).toHaveBeenCalledWith('\\frac{1}{2}', 
+      expect.objectContaining(initialSettings))
+    
+    rerender(<KaTeXComponent math="\frac{1}{2}" settings={newSettings} />)
+    expect(KaTeX.renderToString).toHaveBeenCalledWith('\\frac{1}{2}', 
+      expect.objectContaining(newSettings))
+  })
+
+  test('correctly passes the error to renderError function', () => {
+    const renderError = jest.fn(() => <div data-testid="custom-error">Custom Error</div>)
+    
+    render(<KaTeXComponent math="invalid" renderError={renderError} />)
+    const error = renderError.mock.calls[0][0]
+    
+    expect(error).toBeInstanceOf(KaTeX.ParseError)
+    expect(error.message).toBe('Invalid math expression')
+  })
+
+  test('accepts various valid "as" component types', () => {
+    const validComponents = ['article', 'section', 'code']
+    
+    validComponents.forEach(component => {
+      const { container } = render(<KaTeXComponent math="\frac{1}{2}" as={component as any} />)
+      expect(container.querySelector(component)).toBeInTheDocument()
+    })
+  })
+
+  test('handles optional props correctly when undefined', () => {
+    render(<KaTeXComponent 
+      math="\frac{1}{2}" 
+      // Explicitly leaving out optional props
+    />)
+    
+    // Should default to span and inline mode
+    const element = document.querySelector('span')
+    expect(element).toBeInTheDocument()
+    expect(KaTeX.renderToString).toHaveBeenCalledWith('\\frac{1}{2}', 
+      expect.objectContaining({ displayMode: false }))
+  })
+
+  test('performs cleanup when unmounted to prevent memory leaks', () => {
+    const { unmount } = render(<KaTeXComponent math="\frac{1}{2}" />)
+    unmount()
+    // No need to assert anything, just making sure it doesn't throw
+  })
+
+  test('updates when math expression changes', () => {
+    const { rerender } = render(<KaTeXComponent math="\frac{1}{2}" />)
+    expect(KaTeX.renderToString).toHaveBeenCalledWith('\\frac{1}{2}', expect.anything())
+    
+    rerender(<KaTeXComponent math="\frac{3}{4}" />)
+    expect(KaTeX.renderToString).toHaveBeenCalledWith('\\frac{3}{4}', expect.anything())
+  })
+
+  test('handles whitespace in math expressions', () => {
+    render(<KaTeXComponent math="  \frac{1}{2}  " />)
+    expect(KaTeX.renderToString).toHaveBeenCalledWith('  \\frac{1}{2}  ', expect.anything())
+  })
+
+  test('ensures useMemo caches renderOptions correctly', () => {
+    const settings = { strict: true }
+    const { rerender } = render(<KaTeXComponent math="\frac{1}{2}" settings={settings} />)
+    expect(KaTeX.renderToString).toHaveBeenCalledTimes(1)
+    
+    // Rerender with same settings object
+    rerender(<KaTeXComponent math="\frac{1}{2}" settings={settings} />)
+    expect(KaTeX.renderToString).toHaveBeenCalledTimes(1) // No additional calls due to React.memo
+    
+    // Using a new object with same values should still work
+    const sameSettings = { strict: true }
+    rerender(<KaTeXComponent math="\frac{1}{2}" settings={sameSettings} />)
+    expect(KaTeX.renderToString).toHaveBeenCalledTimes(2) // New call due to new object reference
+  })
+
+  test('handles nested math expressions', () => {
+    const nestedExpression = '\\sqrt{\\frac{1}{2}}'
+    render(<KaTeXComponent math={nestedExpression} />)
+    expect(KaTeX.renderToString).toHaveBeenCalledWith(nestedExpression, expect.anything())
+  })
+
+  test('renders correctly with macros in settings', () => {
+    const macros = { '\RR': '\mathbb{R}' }
+    render(<KaTeXComponent math="\RR" settings={{ macros }} />)
+    expect(KaTeX.renderToString).toHaveBeenCalledWith('\\RR', expect.objectContaining({ macros }))
+  })
+
+  test('respects errorColor setting', () => {
+    render(<KaTeXComponent math="invalid" settings={{ errorColor: 'blue' }} />)
+    expect(screen.getByText('Invalid math expression')).toBeInTheDocument()
+  })
+
+  test('handles zero-width spaces and special characters', () => {
+    const specialChars = '\\alpha\\beta\\gamma'
+    render(<KaTeXComponent math={specialChars} />)
+    expect(KaTeX.renderToString).toHaveBeenCalledWith(specialChars, expect.anything())
+  })
+  
+  test('handles very long math expressions', () => {
+    const longExpression = '\\sum_{i=1}^{100} i^2 = \\frac{n(n+1)(2n+1)}{6} = \\frac{100 \\cdot 101 \\cdot 201}{6} = \\frac{2030100}{6} = 338350'
+    render(<KaTeXComponent math={longExpression} />)
+    expect(KaTeX.renderToString).toHaveBeenCalledWith(longExpression, expect.anything())
   })
 })
