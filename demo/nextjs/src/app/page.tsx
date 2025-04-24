@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import KaTeXComponent from 'react-katex'
+import KaTeXComponent from '@shiueo/react-katex'
 
 const Home = () => {
   return (
