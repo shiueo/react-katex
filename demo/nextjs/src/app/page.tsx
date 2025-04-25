@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
 import KaTeXComponent from '@shiueo/react-katex'
+import 'katex/dist/katex.min.css'
 
 const Home = () => {
   return (
